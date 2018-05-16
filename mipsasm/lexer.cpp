@@ -60,13 +60,25 @@ bool tryparse_instruction(const string& word, Token& token) {
 	return false;
 }
 
-vector< vector<Token> > lexer(const vector<string>& source) {
+#include <iostream>
+vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 	vector< vector<Token> > tokens;
 	for (int i = 0; i < source.size(); i++) {
 		vector<Token> lineTokens = lexerLine(i, source[i]);
+
+		// here we want to check if tokens are fine.
+		for (auto& token : lineTokens) {
+			if (token.type == TOK_UNKNOWN) {
+				cout << "Lexer ERROR: Reason '" << token.message << "' Line: " << token.line << ", Column: " << token.column << endl;
+				*bSuccess = false;
+				return tokens;
+			}
+		}
+
 		tokens.push_back(lineTokens);
 	}
 
+	*bSuccess = true;
 	return tokens;
 }
 

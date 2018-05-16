@@ -29,11 +29,12 @@ public:
 	int line;
 	int column;
 	Instruction instruction;
+	Error error;
 
-	Token(int line, int column) : line{ line }, column{ column } {};
-	Token(Type type, int line, int column) : type{ type }, line{ line }, column{ column } {};
-	Token(Type type, string value, int line, int column) : type{ type }, value{ value }, line{ line }, column{ column } {};
-	Token(Type type, string value, string message, int line, int column) : type{ type }, value{ value }, message{ message }, line{ line }, column{ column } {};
+	Token(int line, int column) : line{ line }, column{ column }, error{ Error() } {};
+	Token(Type type, int line, int column) : type{ type }, line{ line }, column{ column }, error{ Error() } {};
+	Token(Type type, string value, int line, int column) : type{ type }, value{ value }, line{ line }, column{ column }, error{ Error() } {};
+	Token(Type type, string value, string message, int line, int column) : type{ type }, value{ value }, message{ message }, line{ line }, column{ column }, error{ Error() } {};
 
 	void print(ofstream& file) {
 		switch (type)
@@ -71,7 +72,7 @@ bool tryparse_number(const string& word, Token& token);
 bool tryparse_instruction(const string& word, Token& token);
 string find_word(const string& text, int index);
 
-vector< vector<Token> > lexer(const vector<string>& source);
+vector< vector<Token> > lexer(const vector<string>& source, bool* lexerSuccess);
 vector<Token> lexerLine(int lineNumber, const string& line);
 
 void printTokens(vector< vector<Token> >& tokens, ofstream& file);
@@ -81,6 +82,6 @@ void printTokens(vector< vector<Token> >& tokens, ofstream& file);
 //add:reg,reg,reg:R:0/%0/%1/%2/0/32 
 //addi:reg,reg,sint16:I:8/%1/%0/%2
 const vector<Instruction> instructions = {
-	Instruction("add", {Register, Register, Register}),
-	Instruction("addi", {Register, Register, SInt16})
+	Instruction("add", {Register, Register, Register}, R),
+	Instruction("addi", {Register, Register, SInt16}, I)
 };

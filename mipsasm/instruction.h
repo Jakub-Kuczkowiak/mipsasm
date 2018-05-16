@@ -4,6 +4,19 @@
 
 using namespace std;
 
+class Error {
+public:
+	Error() {
+		line = column = -1;
+	}
+
+	bool isError() const { return line != -1; }
+
+	string reason;
+	int line;
+	int column;
+};
+
 enum Format
 {
 	R,
@@ -11,7 +24,7 @@ enum Format
 	J
 };
 
-enum Argument {
+enum ArgumentType {
 	Register,
 	SInt16
 };
@@ -19,12 +32,14 @@ enum Argument {
 class Instruction {
 public:
 	string name;
-	vector<Argument> arguments;
+	vector<ArgumentType> arguments;
+	Format format;
 
 	Instruction() {}
 
-	Instruction(string name, vector<Argument> arguments) {
+	Instruction(string name, vector<ArgumentType> arguments, Format format) {
 		this->name = name;
 		this->arguments = arguments;
+		this->format = format;
 	}
 };

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "lexer.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -21,11 +22,31 @@ int main() {
 		source.push_back(line);
 	}
 
-	vector< vector<Token> > tokens = lexer(source);
+	bool lexerSuccess;
+	vector< vector<Token> > tokens = lexer(source, &lexerSuccess);
 	printTokens(tokens, output);
+
+	if (!lexerSuccess) {
+		cout << "Fatal lexer compiliation" << endl;
+		file.close();
+		output.close();
+		system("PAUSE");
+		return 0;
+	}
+
+	bool parserSuccess;
+	vector<Expression> expressions = parser(tokens, &parserSuccess);
+	printExpressions(expressions, output);
+
+
+
 
 	file.close();
 	output.close();
 
+	system("PAUSE");
+
 	return 0;
 }
+
+// TODO: Implement registers by numbers in LEXER
