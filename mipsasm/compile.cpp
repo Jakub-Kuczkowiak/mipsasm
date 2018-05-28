@@ -2,19 +2,33 @@
 #include "parser.h"
 
 string compileExpression(int address, Expression& expression, int& outAddress) {
-	string line = "";
 	char addressStr[9];
-	itoa(address, addressStr, 16);
+	_itoa_s(address, addressStr, 8, 16);
 	string SAddress(addressStr);
 
 	int bytes = 0;
 	if (expression.instruction.format == R) {
 		int opcode = expression.instruction.opcode;
-		int rs = expression.arguments[0].registerValue;
-		int rt = expression.arguments[1].registerValue;
-		int rd = expression.arguments[2].registerValue;
-		int shamt = expression.instruction.shamt;
+		int rs = 0;
+		int rt = 0;
+		int rd = 0;
+		int shamt = 0;
 		int funct = expression.instruction.funct;
+
+		for (int i = 0; i < expression.instruction.arguments.size(); i++) {
+			if (expression.instruction.arguments[i] == RS) {
+				rs = expression.arguments[i].registerValue;
+			}
+			else if (expression.instruction.arguments[i] == RT) {
+				rt = expression.arguments[i].registerValue;
+			}
+			else if (expression.instruction.arguments[i] == RD) {
+				rd = expression.arguments[i].registerValue;
+			}
+			else if (expression.instruction.arguments[i] == Shamt) {
+				shamt = expression.arguments[i].intValue;
+			}
+		}
 
 		bytes |= (opcode << 26);
 		bytes |= (rs << 21);
@@ -26,25 +40,38 @@ string compileExpression(int address, Expression& expression, int& outAddress) {
 	else if (expression.instruction.format == I) {
 		int opcode = expression.instruction.opcode;
 
-		int rs;
-		int rt;
-		int immediate;
+		int rs = 0;
+		int rt = 0;
+		int immediate = 0;
+
+		for (int i = 0; i < expression.instruction.arguments.size(); i++) {
+			if (expression.instruction.arguments[i] == RS) {
+				rs = expression.arguments[i].registerValue;
+			}
+			else if (expression.instruction.arguments[i] == RT) {
+				rt = expression.arguments[i].registerValue;
+			}
+			else if (expression.instruction.arguments[i] == ArgumentType::SInt16) {
+				immediate = expression.arguments[i].intValue;
+			}
+		}
 
 		bytes |= (opcode << 26);
 		bytes |= (rs << 21);
 		bytes |= (rt << 16);
 		bytes |= (immediate);
 	}
-	else if (expression.instruction.format == J) {
+	// J format is not present for now
+	/*else if (expression.instruction.format == J) {
 		int opcode = expression.instruction.opcode;
 		int address;
 
 		bytes |= (opcode << 26);
 		bytes |= (address);
-	}
+	}*/
 
 	char bytesString[9];
-	itoa(bytes, bytesString, 16);
+	_itoa_s(bytes, bytesString, 8, 16);
 	string SBytes(bytesString);
 
 	outAddress = address + 4;

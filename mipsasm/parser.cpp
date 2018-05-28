@@ -98,7 +98,8 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 			}
 		}
 
-		if (instr.arguments[argsProcessed] == ArgumentType::Register) {
+		if (instr.arguments[argsProcessed] == ArgumentType::RD || instr.arguments[argsProcessed] == ArgumentType::RS || 
+			instr.arguments[argsProcessed] == ArgumentType::RT) {
 			if (tokens[i].type == TOK_REGISTER) {
 				Argument argument;
 				argument.registerName = tokens[i].value;
@@ -108,11 +109,7 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 				bSearchComma = true;
 			}
 			else {
-				Error error;
-				error.line = tokens[i].line;
-				error.column = tokens[i].column;
-				error.reason = "Expected register argument.";
-				return pair<int, Error>(-1, error);
+				return pair<int, Error>(-1, Error("Expected register argument.", tokens[i].line, tokens[i].column));
 			}
 
 		}
@@ -125,11 +122,19 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 				bSearchComma = true;
 			}
 			else {
-				Error error;
-				error.line = tokens[i].line;
-				error.column = tokens[i].column;
-				error.reason = "Expected register argument.";
-				return pair<int, Error>(-1, error);
+				return pair<int, Error>(-1, Error("Expected immediate argument.", tokens[i].line, tokens[i].column));
+			}
+		}
+		else if (instr.arguments[argsProcessed] == ArgumentType::Shamt) {
+			if (tokens[i].type == TOK_INT) {
+				Argument argument;
+				argument.intValue = tokens[i].intValue;
+				arguments.push_back(argument);
+				argsProcessed++;
+				bSearchComma = true;
+			}
+			else {
+				return pair<int, Error>(-1, Error("Expected shamt argument.", tokens[i].line, tokens[i].column));
 			}
 		}
 	}

@@ -27,7 +27,10 @@ enum Format
 };
 
 enum ArgumentType {
-	Register,
+	RD,
+	RS,
+	RT,
+	Shamt,
 	SInt16
 };
 
@@ -37,17 +40,15 @@ public:
 	vector<ArgumentType> arguments;
 	Format format;
 	int opcode;
-	int shamt;
 	int funct;
 
 	Instruction() {}
 
-	Instruction(string name, vector<ArgumentType> arguments, Format format, int opcode, int shamt = 0, int funct = 0) {
+	Instruction(string name, vector<ArgumentType> arguments, Format format, int opcode, int funct = 0) {
 		this->name = name;
 		this->arguments = arguments;
 		this->format = format;
 		this->opcode = opcode;
-		this->shamt = shamt;
 		this->funct = funct;
 	}
 };
