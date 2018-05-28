@@ -9,11 +9,13 @@ using namespace std;
 const int MAX_LINE = 256;
 
 int main() {
+	//generateTests(200);
+
 	ifstream file;
-	file.open("tests/test1a.in");
+	file.open("tests/testrandom.in");
 
 	ofstream output;
-	output.open("tests/test1a.out");
+	output.open("tests/testrandom.out");
 
 	vector<string> source;
 
@@ -25,7 +27,7 @@ int main() {
 
 	bool lexerSuccess;
 	vector< vector<Token> > tokens = lexer(source, &lexerSuccess);
-	printTokens(tokens, output);
+	//printTokens(tokens, output);
 
 	if (!lexerSuccess) {
 		cout << "Fatal lexer compiliation" << endl;
@@ -37,9 +39,10 @@ int main() {
 
 	bool parserSuccess;
 	vector<Expression> expressions = parser(tokens, &parserSuccess);
-	printExpressions(expressions, output);
+	//printExpressions(expressions, output);
 
 	vector<string> compileLines = compile(expressions);
+	printCompiled(compileLines, output);
 
 	file.close();
 	output.close();

@@ -61,6 +61,7 @@ vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 	vector< vector<Token> > tokens;
 	for (int i = 0; i < source.size(); i++) {
 		vector<Token> lineTokens = lexerLine(i, source[i]);
+		if (lineTokens.size() == 0) continue;
 
 		// here we want to check if tokens are fine.
 		for (auto& token : lineTokens) {

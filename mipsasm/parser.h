@@ -5,27 +5,6 @@
 
 using namespace std;
 
-typedef string Comment;
-
-class Argument {
-public:
-	int intValue;
-	int registerValue;
-	string registerName;
-};
-
-class Expression
-{
-public:
-	Instruction instruction;
-	vector<Argument> arguments;
-	Comment comment;
-	Error error;
-
-private:
-
-};
-
 vector<Expression> parser(vector< vector<Token> >& tokens, bool* parserSuccess);
 Expression parseLine(vector<Token>& tokens);
 
