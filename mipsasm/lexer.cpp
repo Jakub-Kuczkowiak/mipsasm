@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "instruction.h"
+#include <iostream>
 
 string find_word(const string& text, int index) {
 	string word("");
@@ -19,13 +20,13 @@ __inline bool is_letter(char c) {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-bool tryparse_number(const string& word, Token& token) {
+bool tryparse_number(const string& word, int& number, int index) {
 	int value = 0;
 	bool bNeg = false;
-	if (word[0] == '-')
+	if (word[index] == '-')
 		bNeg = true;
 
-	int startIndex = (bNeg ? 1 : 0);
+	int startIndex = (bNeg ? index + 1 : index);
 
 	for (int i = startIndex; i < word.length(); i++) {
 		if (is_digit(word[i])) {
@@ -33,15 +34,11 @@ bool tryparse_number(const string& word, Token& token) {
 			value = value + (word[i] - '0');
 		}
 		else {
-			token.type = TOK_UNKNOWN;
-			token.message = "Incorrect number";
-			token.value = word;
 			return false;
 		}
 	}
 
-	token.type = TOK_INT;
-	token.intValue = bNeg ? -value : value;
+	number = bNeg ? -value : value;
 	return true;
 }
 
@@ -60,7 +57,6 @@ bool tryparse_instruction(const string& word, Token& token) {
 	return false;
 }
 
-#include <iostream>
 vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 	vector< vector<Token> > tokens;
 	for (int i = 0; i < source.size(); i++) {
@@ -68,8 +64,8 @@ vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 
 		// here we want to check if tokens are fine.
 		for (auto& token : lineTokens) {
-			if (token.type == TOK_UNKNOWN) {
-				cout << "Lexer ERROR: Reason '" << token.message << "' Line: " << token.line << ", Column: " << token.column << endl;
+			if (token.error.isError()) {
+				cout << "Lexer error: '" << token.error.reason << "'. Line: " << token.error.line << ", Column: " << token.error.column;
 				*bSuccess = false;
 				return tokens;
 			}
@@ -108,63 +104,90 @@ vector<Token> lexerLine(int lineNumber, const string& line) {
 		}
 		else { // case for another thing
 			string word = find_word(line, i);
+			int number;
 			if (word[0] == '$') { // register candidate
 				const char* word_str = word.c_str();
-				if (!strcmp(word_str, "$gp") || !strcmp(word_str, "$sp") ||
-					!strcmp(word_str, "$fp") || !strcmp(word_str, "$ra") ||
-					!strcmp(word_str, "$zero") || !strcmp(word_str, "$at")) {
-					tokens.push_back(Token(TOK_REGISTER, word_str, lineNumber, i));
+				if (!strcmp(word_str, "$gp")) { tokens.push_back(Token(TOK_REGISTER, word_str, 28, lineNumber, i)); }
+				else if (!strcmp(word_str, "$sp")) { tokens.push_back(Token(TOK_REGISTER, word_str, 29, lineNumber, i)); }
+				else if (!strcmp(word_str, "$fp")) { tokens.push_back(Token(TOK_REGISTER, word_str, 30, lineNumber, i)); }
+				else if (!strcmp(word_str, "$ra")) { tokens.push_back(Token(TOK_REGISTER, word_str, 31, lineNumber, i)); }
+				else if (!strcmp(word_str, "$zero")) { tokens.push_back(Token(TOK_REGISTER, word_str, 0, lineNumber, i)); }
+				else if (!strcmp(word_str, "$at")) { tokens.push_back(Token(TOK_REGISTER, word_str, 1, lineNumber, i)); }
+				else if (tryparse_number(word, number, 1)) {
+					if (number >= 0 && number <= 31) { tokens.push_back(Token(TOK_REGISTER, word_str, number, lineNumber, i)); }
+					else { tokens.push_back(Token(Error("Incorrect register name", lineNumber, i))); }
 				}
 				else if (word.size() == 3) {
 					if (word[1] == 'v') {
 						if (word[2] < '0' || word[2] > '1') {
-							tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+							tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 							return tokens;
+						}
+						else {
+							tokens.push_back(Token(TOK_REGISTER, word_str, 2 + (word[2] - '0'), lineNumber, i));
 						}
 					}
 					else if (word[1] == 'a') {
 						if (word[2] < '0' || word[2] > '3') {
-							tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+							tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 							return tokens;
+						}
+						else {
+							tokens.push_back(Token(TOK_REGISTER, word_str, 4 + (word[2] - '0'), lineNumber, i));
 						}
 					}
 					else if (word[1] == 't') {
 						if (word[2] < '0' || word[2] > '9') {
-							tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+							tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 							return tokens;
+						}
+						else {
+							if (word[2] <= '7') {
+								tokens.push_back(Token(TOK_REGISTER, word_str, 8 + (word[2] - '0'), lineNumber, i));
+							}
+							else {
+								tokens.push_back(Token(TOK_REGISTER, word_str, 24 + (word[2] - '8'), lineNumber, i));
+							}
 						}
 					}
 					else if (word[1] == 's') {
 						if (word[2] < '0' || word[2] > '7') {
-							tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+							tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 							return tokens;
+						}
+						else {
+							tokens.push_back(Token(TOK_REGISTER, word_str, 16 + (word[2] - '0'), lineNumber, i));
 						}
 					}
 					else if (word[1] == 'k') {
 						if (word[2] < '0' || word[2] > '1') {
-							tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+							tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 							return tokens;
+						}
+						else {
+							tokens.push_back(Token(TOK_REGISTER, word_str, 26 + (word[2] - '0'), lineNumber, i));
 						}
 					}
 					else {
-						tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+						tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 						return tokens;
 					}
-
-					tokens.push_back(Token(TOK_REGISTER, word, lineNumber, i));
 				}
 				else {
-					tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect register name", lineNumber, i));
+					tokens.push_back(Token(Error("Incorrect register name", lineNumber, i)));
 					return tokens;
 				}
 			}
 			else if (word[0] == '-' || is_digit(word[0])) { // number candidate
-				Token token(lineNumber, i);
-				if (tryparse_number(word, token)) {
+				int value;
+				if (tryparse_number(word, value, 0)) {
+					Token token(lineNumber, i);
+					token.type = TOK_INT;
+					token.intValue = value;
 					tokens.push_back(token);
 				}
 				else {
-					tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect number", lineNumber, i));
+					tokens.push_back(Token(Error("Incorrect number: " + word, lineNumber, i)));
 					return tokens;
 				}
 			}
@@ -174,7 +197,7 @@ vector<Token> lexerLine(int lineNumber, const string& line) {
 					tokens.push_back(token);
 				}
 				else {
-					tokens.push_back(Token(TOK_UNKNOWN, word, "Incorrect instruction", lineNumber, i));
+					tokens.push_back(Token(Error("Incorrect instruction", lineNumber, i)));
 					return tokens;
 				}
 			}

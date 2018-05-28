@@ -31,9 +31,11 @@ public:
 	Instruction instruction;
 	Error error;
 
+	Token(Error err) : error{ err } {};
 	Token(int line, int column) : line{ line }, column{ column }, error{ Error() } {};
 	Token(Type type, int line, int column) : type{ type }, line{ line }, column{ column }, error{ Error() } {};
 	Token(Type type, string value, int line, int column) : type{ type }, value{ value }, line{ line }, column{ column }, error{ Error() } {};
+	Token(Type type, string value, int intValue, int line, int column) : type{ type }, value{ value }, intValue{ intValue }, line { line }, column{ column }, error{ Error() } {};
 	Token(Type type, string value, string message, int line, int column) : type{ type }, value{ value }, message{ message }, line{ line }, column{ column }, error{ Error() } {};
 
 	void print(ofstream& file) {
@@ -82,6 +84,36 @@ void printTokens(vector< vector<Token> >& tokens, ofstream& file);
 //add:reg,reg,reg:R:0/%0/%1/%2/0/32 
 //addi:reg,reg,sint16:I:8/%1/%0/%2
 const vector<Instruction> instructions = {
-	Instruction("add", {Register, Register, Register}, R),
-	Instruction("addi", {Register, Register, SInt16}, I)
+	//Instruction("lui");
+	Instruction("add", {Register, Register, Register}, R, 0x20, 0x00),
+	Instruction("addi", {Register, Register, SInt16}, I, 0x08),
+	//Instruction("addiu"),
+	//Instruction("slti"),
+	//Instruction("sltiu"),
+	//Instruction("andi"),
+	//Instruction("ori"),
+	//Instruction("xori"),
+	//Instruction("sll"),
+	//Instruction("srl"),
+	//Instruction("sra"),
+	//Instruction("sllv"),
+	//Instruction("srlv"),
+	//Instruction("srav"),
+	//Instruction("mfhi"),
+	//Instruction("mthi"),
+	//Instruction("mflo"),
+	//Instruction("mtlo"),
+	//Instruction("mult"),
+	//Instruction("multu"),
+	//Instruction("div"),
+	//Instruction("divu"),
+	//Instruction("addu")
+	//Instruction("sub"),
+	//Instruction("subu"),
+	//Instruction("and"),
+	//Instruction("or"),
+	//Instruction("xor"),
+	//Instruction("nor"),
+	//Instruction("slt"),
+	//Instruction("sltu"),
 };

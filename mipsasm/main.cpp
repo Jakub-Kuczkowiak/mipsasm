@@ -2,6 +2,7 @@
 #include <fstream>
 #include "lexer.h"
 #include "parser.h"
+#include "compile.h"
 
 using namespace std;
 
@@ -38,8 +39,7 @@ int main() {
 	vector<Expression> expressions = parser(tokens, &parserSuccess);
 	printExpressions(expressions, output);
 
-
-
+	vector<string> compileLines = compile(expressions);
 
 	file.close();
 	output.close();
@@ -48,5 +48,3 @@ int main() {
 
 	return 0;
 }
-
-// TODO: Implement registers by numbers in LEXER

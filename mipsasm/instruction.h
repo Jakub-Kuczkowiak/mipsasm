@@ -10,6 +10,8 @@ public:
 		line = column = -1;
 	}
 
+	Error(string reason, int line, int column) : reason{ reason }, line{ line }, column{ column } {};
+
 	bool isError() const { return line != -1; }
 
 	string reason;
@@ -34,12 +36,18 @@ public:
 	string name;
 	vector<ArgumentType> arguments;
 	Format format;
+	int opcode;
+	int shamt;
+	int funct;
 
 	Instruction() {}
 
-	Instruction(string name, vector<ArgumentType> arguments, Format format) {
+	Instruction(string name, vector<ArgumentType> arguments, Format format, int opcode, int shamt = 0, int funct = 0) {
 		this->name = name;
 		this->arguments = arguments;
 		this->format = format;
+		this->opcode = opcode;
+		this->shamt = shamt;
+		this->funct = funct;
 	}
 };
