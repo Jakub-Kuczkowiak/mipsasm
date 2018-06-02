@@ -6,7 +6,7 @@
 using namespace std;
 
 vector<Expression> parser(vector< vector<Token> >& tokens, bool* parserSuccess);
-Expression parseLine(vector<Token>& tokens);
+pair<Expression, bool> parseLine(vector<Token>& tokens);
 
 pair<int, Error> instr(vector<Token>& tokens, Instruction& instruction);
 pair<int, Error> arguments(Instruction& instruction, vector<Token>& tokens, int index, vector<Argument>& args);

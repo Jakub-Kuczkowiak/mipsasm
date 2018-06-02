@@ -1,7 +1,7 @@
+#include <algorithm>
+#include <time.h>
 #include "compile.h"
 #include "parser.h"
-
-#include <time.h>
 
 void generateTests(int testsNumber) {
 	ofstream output;
@@ -20,9 +20,18 @@ void generateTests(int testsNumber) {
 				int registerNum = rand() % 32;
 				output << "$" << registerNum;
 			}
-			else if (instructions[instrId].arguments[j] == ArgumentType::Shamt || 
-				instructions[instrId].arguments[j] == ArgumentType::SInt16) {
-				int num = rand() % INT16_MAX;
+			else if (instructions[instrId].arguments[j] == ArgumentType::SInt16) {
+				int num = rand() % (INT16_MAX + 1);
+				if (rand() % 2 == 0)
+					num = -num;
+				output << num;
+			}
+			else if (instructions[instrId].arguments[j] == ArgumentType::UInt16) {
+				int num = rand() % UINT16_MAX;
+				output << num;
+			}
+			else if (instructions[instrId].arguments[j] == ArgumentType::Shamt) {
+				int num = rand() % 32;
 				output << num;
 			}
 
@@ -41,7 +50,6 @@ void generateTests(int testsNumber) {
 	output.close();
 }
 
-#include <algorithm>
 string compileExpression(int address, Expression& expression, int& outAddress) {
 	char addressStr[10];
 	_itoa_s(address, addressStr, 9, 16);
@@ -94,7 +102,7 @@ string compileExpression(int address, Expression& expression, int& outAddress) {
 			else if (expression.instruction.arguments[i] == RT) {
 				rt = expression.arguments[i].registerValue;
 			}
-			else if (expression.instruction.arguments[i] == ArgumentType::SInt16) {
+			else if (expression.instruction.arguments[i] == ArgumentType::SInt16 || expression.instruction.arguments[i] == ArgumentType::UInt16) {
 				if (expression.arguments[i].intValue < 0)
 					immediate = 65536 + expression.arguments[i].intValue;
 				else
@@ -124,20 +132,21 @@ string compileExpression(int address, Expression& expression, int& outAddress) {
 
 	outAddress = address + 4;
 
-	string line = SAddress + " " + SBytes + " " + expression.instruction.name + " ";
+	string line = "  " + SAddress + "   " + SBytes + "   " + expression.instruction.name + " ";
+
 	for (int i = 0; i < expression.instruction.arguments.size(); i++) {
 		if (expression.instruction.arguments[i] == ArgumentType::RD || expression.instruction.arguments[i] == ArgumentType::RS
 			|| expression.instruction.arguments[i] == ArgumentType::RT) {
 			line += "$" + to_string(expression.arguments[i].registerValue);
 		}
-		else if (expression.instruction.arguments[i] == ArgumentType::Shamt || expression.instruction.arguments[i] == ArgumentType::SInt16) {
+		else if (expression.instruction.arguments[i] == ArgumentType::Shamt || expression.instruction.arguments[i] == ArgumentType::SInt16 || expression.instruction.arguments[i] == ArgumentType::UInt16) {
 			line += to_string(expression.arguments[i].intValue);
 		}
 
 		if (i != expression.instruction.arguments.size() - 1) line += ", ";
 	}
 
-	if (expression.comment.length() > 0) line += "; " + expression.comment;
+	if (expression.comment.length() > 0) line += (" " + expression.comment);
 	return line;
 }
 

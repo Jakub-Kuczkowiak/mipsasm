@@ -5,15 +5,23 @@
 
 using namespace std;
 
-Expression parseLine(vector<Token>& tokens)
+pair<Expression, bool> parseLine(vector<Token>& tokens)
 {
+	// line can be just a comment as well
+	Comment commentTest;
+	pair<int, Error> resTest = comments(tokens, 0, commentTest);
+	if (resTest.first != -1) {
+		return pair<Expression, bool>(Expression(), false);
+	}
+
+	// if not, it's a full expression
 	Expression expression;
 
 	Instruction instruction;
 	pair<int, Error> res = instr(tokens, instruction);
 	if (res.first == -1) {
 		expression.error = res.second;
-		return expression;
+		return pair<Expression, bool>(expression, true);
 	}
 
 	expression.instruction = instruction;
@@ -22,7 +30,7 @@ Expression parseLine(vector<Token>& tokens)
 	res = arguments(instruction, tokens, res.first, args);
 	if (res.first == -1) {
 		expression.error = res.second;
-		return expression;
+		return pair<Expression, bool>(expression, true);
 	}
 
 	expression.arguments = args;
@@ -31,25 +39,33 @@ Expression parseLine(vector<Token>& tokens)
 	res = comments(tokens, res.first, comment);
 	if (res.first == -1) {
 		expression.error = res.second;
-		return expression;
+		return pair<Expression, bool>(expression, true);
 	}
 
 	expression.comment = comment;
 
-	return expression;
+	return pair<Expression, bool>(expression, true);
+}
+
+void findWarnings(Expression& expression) {
+	// here we add all exception to be checked
+	
 }
 
 vector<Expression> parser(vector< vector<Token> >& tokens, bool* parserSuccess) {
 	vector<Expression> result;
 	for (int i = 0; i < tokens.size(); i++) {
-		Expression expression = parseLine(tokens[i]);
-		if (expression.error.isError()) {
-			*parserSuccess = false;
-			cout << "Parser error: '" << expression.error.reason << "'. Line: " << expression.error.line << ", Column: " << expression.error.column;
-			return result;
-		}
+		pair<Expression, bool> exp = parseLine(tokens[i]);
+		if (exp.second) { // it's not a comment
+			Expression& expression = exp.first;
+			if (expression.error.isError()) {
+				*parserSuccess = false;
+				cout << "Parser error: '" << expression.error.reason << "'. Line: " << expression.error.line << ", Column: " << expression.error.column;
+				return result;
+			}
 
-		result.push_back(expression);
+			result.push_back(expression);
+		}
 	}
 
 	*parserSuccess = true;
@@ -90,11 +106,7 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 				continue;
 			}
 			else {
-				Error error;
-				error.reason = "Comma expetected";
-				error.line = tokens[i].line;
-				error.column = tokens[i].column;
-				return pair<int, Error>(-1, error);
+				return pair<int, Error>(-1, Error("Comma expected", tokens[i].line, tokens[i].column));
 			}
 		}
 
@@ -115,6 +127,26 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 		}
 		else if (instr.arguments[argsProcessed] == ArgumentType::SInt16) {
 			if (tokens[i].type == TOK_INT) {
+				if (tokens[i].intValue > INT16_MAX || tokens[i].intValue < INT16_MIN) {
+					return pair<int, Error>(-1, Error("Immediate argument must be in interval -32767 - 1 to 32767", tokens[i].line, tokens[i].column));
+				}
+
+				Argument argument;
+				argument.intValue = tokens[i].intValue;
+				arguments.push_back(argument);
+				argsProcessed++;
+				bSearchComma = true;
+			}
+			else {
+				return pair<int, Error>(-1, Error("Expected immediate argument.", tokens[i].line, tokens[i].column));
+			}
+		}
+		else if (instr.arguments[argsProcessed] == ArgumentType::UInt16) {
+			if (tokens[i].type == TOK_INT) {
+				if (tokens[i].intValue < 0 || tokens[i].intValue > UINT16_MAX) {
+					return pair<int, Error>(-1, Error("Zero-Immediate argument must be in interval 0 to 65535", tokens[i].line, tokens[i].column));
+				}
+
 				Argument argument;
 				argument.intValue = tokens[i].intValue;
 				arguments.push_back(argument);
@@ -127,6 +159,10 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 		}
 		else if (instr.arguments[argsProcessed] == ArgumentType::Shamt) {
 			if (tokens[i].type == TOK_INT) {
+				if (tokens[i].intValue > 31 || tokens[i].intValue < 0) {
+					return pair<int, Error>(-1, Error("Shamt argument must be in interval 0 to 31", tokens[i].line, tokens[i].column));
+				}
+
 				Argument argument;
 				argument.intValue = tokens[i].intValue;
 				arguments.push_back(argument);

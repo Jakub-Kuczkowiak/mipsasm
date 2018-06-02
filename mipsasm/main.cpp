@@ -9,7 +9,7 @@ using namespace std;
 const int MAX_LINE = 256;
 
 int main() {
-	//generateTests(200);
+	//generateTests(20000);
 
 	ifstream file;
 	file.open("tests/testrandom.in");
@@ -40,6 +40,14 @@ int main() {
 	bool parserSuccess;
 	vector<Expression> expressions = parser(tokens, &parserSuccess);
 	//printExpressions(expressions, output);
+
+	if (!parserSuccess) {
+		cout << "Fatal parser error" << endl;
+		file.close();
+		output.close();
+		system("PAUSE");
+		return 0;
+	}
 
 	vector<string> compileLines = compile(expressions);
 	printCompiled(compileLines, output);
