@@ -6,18 +6,18 @@ flags = -std=c++11 -Wall -Wextra
 all: main
 
 main: $(headers) $(objects)
-	g++ $(flags) -o $(objects)
+	g++ $(flags) -o main $(objects)
 
-main.o: main.cpp
+main.o: main.cpp $(headers)
 	g++ $(flags) -c -o $@ main.cpp
 
-lexer.o: lexer.cpp
+lexer.o: lexer.cpp $(headers)
 	g++ $(flags) -c -o $@ lexer.cpp
 
-parser.o: parser.cpp
+parser.o: parser.cpp $(headers)
 	g++ $(flags) -c -o $@ parser.cpp
 
-compile.o: compile.cpp
+compile.o: compile.cpp $(headers)
 	g++ $(flags) -c -o $@ compile.cpp
 
 clean:

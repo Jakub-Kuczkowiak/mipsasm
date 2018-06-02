@@ -1,3 +1,5 @@
+add $s0, $s1, $s2
+addi $t0,$s3,-12
 divu $6, $11
 divu $9, $27 # comment(1)
 mfhi $10

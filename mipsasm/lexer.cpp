@@ -61,7 +61,7 @@ bool tryparse_instruction(const string& word, Token& token) {
 vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 	vector< vector<Token> > tokens;
 	for (size_t i = 0; i < source.size(); i++) {
-		vector<Token> lineTokens = lexerLine(i, source[i]);
+		vector<Token> lineTokens = lexerLine((int)i, source[i]);
 		if (lineTokens.size() == 0) continue;
 
 		// here we want to check if tokens are fine.

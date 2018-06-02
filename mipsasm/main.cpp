@@ -33,7 +33,7 @@ int main() {
 		cout << "Fatal lexer compiliation" << endl;
 		file.close();
 		output.close();
-		system("PAUSE");
+		//system("PAUSE");
 		return 0;
 	}
 
@@ -45,7 +45,7 @@ int main() {
 		cout << "Fatal parser error" << endl;
 		file.close();
 		output.close();
-		system("PAUSE");
+		//system("PAUSE");
 		return 0;
 	}
 
@@ -55,7 +55,7 @@ int main() {
 	file.close();
 	output.close();
 
-	system("PAUSE");
+	//system("PAUSE");
 
 	return 0;
 }

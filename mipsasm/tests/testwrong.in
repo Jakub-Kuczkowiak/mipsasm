@@ -1,0 +1,8 @@
+sra $26, $27, 8509
+lui $13, -22205 # shamt must be an interval 0 to 31
+srl $10, $1, -21290 # shamt must be an interval 0 to 31
+xori $3, $11, -11226
+andi $27,$5,-11928
+# empty line trick ;)
+lui $21,-15255
+add $s6,$s1,$s2 # incorrect register!

@@ -54,7 +54,7 @@ void findWarnings(Expression& expression) {
 
 vector<Expression> parser(vector< vector<Token> >& tokens, bool* parserSuccess) {
 	vector<Expression> result;
-	for (int i = 0; i < tokens.size(); i++) {
+	for (size_t i = 0; i < tokens.size(); i++) {
 		pair<Expression, bool> exp = parseLine(tokens[i]);
 		if (exp.second) { // it's not a comment
 			Expression& expression = exp.first;
@@ -73,7 +73,7 @@ vector<Expression> parser(vector< vector<Token> >& tokens, bool* parserSuccess) 
 }
 
 pair<int, Error> instr(vector<Token>& tokens, Instruction& instruction) {
-	for (int i = 0; i < tokens.size(); i++) {
+	for (size_t i = 0; i < tokens.size(); i++) {
 		if (tokens[i].type == TOK_SPACE) continue;
 		else if (tokens[i].type == TOK_INSTR) {
 			instruction = tokens[i].instruction;
@@ -94,8 +94,8 @@ pair<int, Error> instr(vector<Token>& tokens, Instruction& instruction) {
 pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index, vector<Argument>& arguments) {
 	int argsProcessed = 0;
 	bool bSearchComma = false;
-	for (int i = index; i < tokens.size(); i++) {
-		if (argsProcessed == instr.arguments.size()) {
+	for (size_t i = index; i < tokens.size(); i++) {
+		if (argsProcessed == (int)instr.arguments.size()) {
 			return pair<int, Error>(i + 1, Error());
 		}
 		if (tokens[i].type == TOK_SPACE) continue;
@@ -175,14 +175,14 @@ pair<int, Error> arguments(Instruction& instr, vector<Token>& tokens, int index,
 		}
 	}
 
-	if (argsProcessed == instr.arguments.size()) {
+	if (argsProcessed == (int)instr.arguments.size()) {
 		return pair<int, Error>(tokens.size(), Error());
 	}
 	return pair<int, Error>(-1, Error());
 }
 
 pair<int, Error> comments(vector<Token>& tokens, int index, Comment& comment) {
-	for (int i = index; i < tokens.size(); i++) {
+	for (size_t i = index; i < tokens.size(); i++) {
 		if (tokens[i].type == TOK_SPACE) continue;
 
 		if (tokens[i].type == TOK_COMMENT) {
@@ -202,7 +202,7 @@ pair<int, Error> comments(vector<Token>& tokens, int index, Comment& comment) {
 }
 
 void printExpressions(vector<Expression>& expressions, ostream& output) {
-	for (int i = 0; i < expressions.size(); i++) {
+	for (size_t i = 0; i < expressions.size(); i++) {
 
 	}
 }

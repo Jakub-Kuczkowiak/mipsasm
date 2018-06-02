@@ -10,6 +10,7 @@ class Error {
 public:
 	Error() {
 		line = column = -1;
+		reason = "";
 	}
 
 	Error(string reason, int line, int column) : reason{ reason }, line{ line }, column{ column } {};
