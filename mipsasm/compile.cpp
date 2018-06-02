@@ -2,18 +2,20 @@
 #include <time.h>
 #include "compile.h"
 #include "parser.h"
+#include <cstdlib>
+#include <sstream>
 
 void generateTests(int testsNumber) {
 	ofstream output;
 	output.open("tests/testrandom.in");
 
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 
 	for (int i = 0; i < testsNumber; i++) {
 		int instrId = rand() % instructions.size();
 		output << instructions[instrId].name << " ";
 
-		for (int j = 0; j < instructions[instrId].arguments.size(); j++) {
+		for (size_t j = 0; j < instructions[instrId].arguments.size(); j++) {
 			if (instructions[instrId].arguments[j] == RT || instructions[instrId].arguments[j] == RS
 				|| instructions[instrId].arguments[j] == RD) {
 				// register choice
@@ -51,11 +53,13 @@ void generateTests(int testsNumber) {
 }
 
 string compileExpression(int address, Expression& expression, int& outAddress) {
-	char addressStr[10];
-	_itoa_s(address, addressStr, 9, 16);
-	string SAddress(addressStr);
-	transform(SAddress.begin(), SAddress.end(), SAddress.begin(), toupper);
-	for (int i = SAddress.length(); i < 8; i++) SAddress = "0" + SAddress;
+	stringstream ss;
+	ss << hex << address;
+	string SAddress(ss.str());
+
+	transform(SAddress.begin(), SAddress.end(), SAddress.begin(), [](unsigned char c) -> unsigned char { return toupper(c); });
+
+	for (size_t i = SAddress.length(); i < 8; i++) SAddress = "0" + SAddress;
 
 	int bytes = 0;
 	if (expression.instruction.format == R) {
@@ -124,17 +128,19 @@ string compileExpression(int address, Expression& expression, int& outAddress) {
 		bytes |= (address);
 	}*/
 
-	char bytesString[10];
-	_itoa_s(bytes, bytesString, 9, 16);
-	string SBytes(bytesString);
-	transform(SBytes.begin(), SBytes.end(), SBytes.begin(), toupper);
-	for (int i = SBytes.length(); i < 8; i++) SBytes = "0" + SBytes;
+	stringstream bytesString;
+	bytesString << hex << bytes;
+	string SBytes(bytesString.str());
+
+	transform(SBytes.begin(), SBytes.end(), SBytes.begin(), [](unsigned char c) -> unsigned char { return toupper(c); });
+
+	for (size_t i = SBytes.length(); i < 8; i++) SBytes = "0" + SBytes;
 
 	outAddress = address + 4;
 
 	string line = "  " + SAddress + "   " + SBytes + "   " + expression.instruction.name + " ";
 
-	for (int i = 0; i < expression.instruction.arguments.size(); i++) {
+	for (size_t i = 0; i < expression.instruction.arguments.size(); i++) {
 		if (expression.instruction.arguments[i] == ArgumentType::RD || expression.instruction.arguments[i] == ArgumentType::RS
 			|| expression.instruction.arguments[i] == ArgumentType::RT) {
 			line += "$" + to_string(expression.arguments[i].registerValue);

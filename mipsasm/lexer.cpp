@@ -1,10 +1,11 @@
 #include "lexer.h"
 #include "instruction.h"
 #include <iostream>
+#include <string.h>
 
 string find_word(const string& text, int index) {
 	string word("");
-	for (int i = index; i < text.length(); i++) {
+	for (size_t i = index; i < text.length(); i++) {
 		if (text[i] == '\n' || text[i] == ' ' || text[i] == '\t' || text[i] == ',') break;
 		word += text[i];
 	}
@@ -28,7 +29,7 @@ bool tryparse_number(const string& word, int& number, int index) {
 
 	int startIndex = (bNeg ? index + 1 : index);
 
-	for (int i = startIndex; i < word.length(); i++) {
+	for (size_t i = startIndex; i < word.length(); i++) {
 		if (is_digit(word[i])) {
 			value = value * 10;
 			value = value + (word[i] - '0');
@@ -43,7 +44,7 @@ bool tryparse_number(const string& word, int& number, int index) {
 }
 
 bool tryparse_instruction(const string& word, Token& token) {
-	for (int i = 0; i < instructions.size(); i++) {
+	for (size_t i = 0; i < instructions.size(); i++) {
 		if (instructions[i].name == word) {
 			token.type = TOK_INSTR;
 			token.instruction = instructions[i];
@@ -51,15 +52,15 @@ bool tryparse_instruction(const string& word, Token& token) {
 		}
 	}
 
+	token.error = Error("Incorrect instruction", token.line, token.column);
 	token.type = TOK_UNKNOWN;
-	token.message = "Incorrect instruction";
 	token.value = word;
 	return false;
 }
 
 vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 	vector< vector<Token> > tokens;
-	for (int i = 0; i < source.size(); i++) {
+	for (size_t i = 0; i < source.size(); i++) {
 		vector<Token> lineTokens = lexerLine(i, source[i]);
 		if (lineTokens.size() == 0) continue;
 
@@ -82,7 +83,7 @@ vector< vector<Token> > lexer(const vector<string>& source, bool* bSuccess) {
 vector<Token> lexerLine(int lineNumber, const string& line) {
 	vector<Token> tokens;
 
-	for (int i = 0; i < line.length();) {
+	for (size_t i = 0; i < line.length();) {
 		if (line[i] == '#') { // handling comments
 			string comment = line.substr(i, line.size() - i + 1);
 			tokens.push_back(Token(TOK_COMMENT, comment, lineNumber, i));
@@ -96,7 +97,7 @@ vector<Token> lexerLine(int lineNumber, const string& line) {
 		}
 		else if (line[i] == ' ' || line[i] == '\t') {
 			tokens.push_back(Token(TOK_SPACE, lineNumber, i));
-			int j;
+			size_t j;
 			for (j = i + 1; j < line.length(); j++) {
 				if (line[j] != ' ' && line[j] != '\t') break;
 			}
@@ -203,7 +204,7 @@ vector<Token> lexerLine(int lineNumber, const string& line) {
 				}
 			}
 
-			i = i + word.size();
+			i = i + (int)word.size();
 			continue;
 		}
 
@@ -214,8 +215,8 @@ vector<Token> lexerLine(int lineNumber, const string& line) {
 }
 
 void printTokens(vector< vector<Token> >& tokens, ofstream& file) {
-	for (int i = 0; i < tokens.size(); i++) {
-		for (int j = 0; j < tokens[i].size(); j++) {
+	for (size_t i = 0; i < tokens.size(); i++) {
+		for (size_t j = 0; j < tokens[i].size(); j++) {
 			tokens[i][j].print(file);
 			file << " ";
 		}

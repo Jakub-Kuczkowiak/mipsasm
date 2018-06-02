@@ -25,7 +25,7 @@ public:
 	Type type;
 	int intValue;
 	string value;
-	string message;
+	//string message;
 	int line;
 	int column;
 	Instruction instruction;
@@ -35,8 +35,7 @@ public:
 	Token(int line, int column) : line{ line }, column{ column }, error{ Error() } {};
 	Token(Type type, int line, int column) : type{ type }, line{ line }, column{ column }, error{ Error() } {};
 	Token(Type type, string value, int line, int column) : type{ type }, value{ value }, line{ line }, column{ column }, error{ Error() } {};
-	Token(Type type, string value, int intValue, int line, int column) : type{ type }, value{ value }, intValue{ intValue }, line { line }, column{ column }, error{ Error() } {};
-	Token(Type type, string value, string message, int line, int column) : type{ type }, value{ value }, message{ message }, line{ line }, column{ column }, error{ Error() } {};
+	Token(Type type, string value, int intValue, int line, int column) : type{ type }, value{ value }, intValue{ intValue }, line{ line }, column{ column }, error{ Error() } { };
 
 	void print(ofstream& file) {
 		switch (type)
@@ -60,7 +59,7 @@ public:
 			file << "TOK_COMMENT(" << value << ")";
 			break;
 		case TOK_UNKNOWN:
-			file << "TOK_UNKNOWN(" << value << ", " << message << ")";
+			file << "TOK_UNKNOWN(" << value;
 			break;
 		default:
 			break;
